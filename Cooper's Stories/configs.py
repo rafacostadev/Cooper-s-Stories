@@ -1,19 +1,20 @@
 # Layout do mapa
 mapa = [
+    "                ",
     "                   ",
-    "         XXXXXXXX          ",
+    "                                ",
     "                   ",
-    " XXXX                  ",
-    "     XXX   P           ",
-    "        XXXX           ",
-    "        XXXXX      ",
-    "                XXXXXXXX  ",
-    "               XX    ",
-    "           XXXXXXX        ",
-    "XXXXXXXXXXXXXXXX        ", ]
+    "                                     ",
+    "                                     XXX",
+    "                                XXX",
+    "           N    P              ",
+    "       XXXXXXXXX   XXXX   XXXX",
+    "       XXXXXXXXX   XXXX   XXXX",
+    "    XXXXXXXXXXXX   XXXX   XXXX",
+    "XXXXXXXXXXXXXXXX   XXXX   XXXX"]
 
 
 # Configurações de tamanho
 tamanhoBloco = 32
 largura = 1200
-altura = len(mapa) * tamanhoBloco
+altura = (len(mapa)-1) * tamanhoBloco

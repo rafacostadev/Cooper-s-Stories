@@ -16,7 +16,7 @@ while True:
             exit()
 
     tela.fill("black")
-    level.mostrarblocos()
+    level.mostrar_mapa()
 
     # Adicionar antes
     pygame.display.update()
