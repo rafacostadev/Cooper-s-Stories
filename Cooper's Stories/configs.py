@@ -7,7 +7,7 @@ mapa = [
     "                                     ",
     "                                     XXX",
     "                                XXX",
-    "           N    P              ",
+    "          P  N                ",
     "       XXXXXXXXX   XXXX   XXXX",
     "       XXXXXXXXX   XXXX   XXXX",
     "    XXXXXXXXXXXX   XXXX   XXXX",

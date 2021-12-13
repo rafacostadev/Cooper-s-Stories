@@ -13,7 +13,9 @@ class Jogador(pygame.sprite.Sprite):
             "./assets/characters/main/idle/1.png").convert_alpha()
         self.rect = self.image.get_rect(midbottom=pos)
         self.direcao = pygame.math.Vector2(0, 0)
-        self.velocidade = 8
+        self.velocidade = 4
+        self.peso = 0.8
+        self.pulo = -10
 
     def movimento(self):
         '''
@@ -29,9 +31,24 @@ class Jogador(pygame.sprite.Sprite):
         else:
             self.direcao.x = 0
 
+        if tecla[pygame.K_SPACE]:
+            self.pular()
+
+    def gravidade(self):
+        '''
+        Método que aplica a gravidade do jogador.
+        '''
+        self.direcao.y += self.peso
+        self.rect.y += self.direcao.y
+
+    def pular(self):
+        '''
+        Método que faz o jogador pular.
+        '''
+        self.direcao.y = self.pulo
+
     def update(self):
         '''
         Método que aplica a movimentação.
         '''
         self.movimento()
-        self.rect.x += self.direcao.x * self.velocidade

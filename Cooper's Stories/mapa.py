@@ -7,8 +7,8 @@ from missao_1_npc import Npc
 
 class MostrarBlocos():
     '''
-    Classe que recebe os atributos para mostrar os blocos.
-    level = "mapa" que vai ser usado para mostrar os blocos na tela. 
+    Classe que recebe os atributos para iniciar o mapa completo.
+    level = "mapa" que vai ser usado para mostrar os blocos na tela.
     superficie = a tela em que vai ser mostrada o mapa.
     '''
 
@@ -54,20 +54,43 @@ class MostrarBlocos():
             jogador.velocidade = 0
         else:
             self.movimento = 0
-            jogador.velocidade = 8
+            jogador.velocidade = 4
+
+    def colisao_horizontal(self):
+        jogador = self.jogador.sprite
+        jogador.rect.x += jogador.direcao.x * jogador.velocidade
+        for sprite in self.blocos.sprites():
+            if sprite.rect.colliderect(jogador.rect):
+                if jogador.direcao.x < 0:
+                    jogador.rect.left = sprite.rect.right
+                elif jogador.direcao.x > 0:
+                    jogador.rect.right = sprite.rect.left
+
+    def colisao_vertical(self):
+        jogador = self.jogador.sprite
+        jogador.gravidade()
+        for sprite in self.blocos.sprites():
+            if sprite.rect.colliderect(jogador.rect):
+                if jogador.direcao.y > 0:
+                    jogador.rect.bottom = sprite.rect.top
+                    jogador.direcao.y = 0
+                elif jogador.direcao.y < 0:
+                    jogador.rect.top = sprite.rect.bottom
+                    jogador.direcao.y = 0
 
     def mostrar_mapa(self):
         '''
         Usado para facilitar e diminuir o código ao mostrar
         os blocos e jogador na tela e executar todos os métodos restantes.
         '''
-        # Blocos
+        # Mapa
         self.blocos.draw(self.superficie)
         self.blocos.update(self.movimento)
-
+        self.movimento_camera()
+        self.colisao_horizontal()
+        self.colisao_vertical()
         # Jogador
         self.jogador.update()
         self.jogador.draw(self.superficie)
-        self.movimento_camera()
         # Npc
         self.npc.draw(self.superficie)
