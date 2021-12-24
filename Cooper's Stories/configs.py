@@ -8,8 +8,8 @@ mapa = [
     "                                     XXX",
     "                                XXX",
     "          P  N                ",
-    "       XXXXXXXXX   XXXX   XXXX",
-    "       XXXXXXXXX   XXXX   XXXX",
+    "    X XXXXXXXXXX   XXXX   XXXX",
+    "    X XXXXXXXXXX   XXXX   XXXX",
     "    XXXXXXXXXXXX   XXXX   XXXX",
     "XXXXXXXXXXXXXXXX   XXXX   XXXX"]
 

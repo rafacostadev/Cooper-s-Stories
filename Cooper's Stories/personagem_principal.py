@@ -1,4 +1,5 @@
 import pygame
+from suporte import importar_arquivo
 
 
 class Jogador(pygame.sprite.Sprite):
@@ -9,13 +10,31 @@ class Jogador(pygame.sprite.Sprite):
 
     def __init__(self, pos):
         super().__init__()
-        self.image = pygame.image.load(
-            "./assets/characters/main/idle/1.png").convert_alpha()
+        self.importar_animacoes()
+        self.estado_animacao = 0
+        self.velocidade_animacao = 0.15
+        self.image = self.estados["idle"][self.estado_animacao]
         self.rect = self.image.get_rect(midbottom=pos)
         self.direcao = pygame.math.Vector2(0, 0)
         self.velocidade = 4
-        self.peso = 0.8
-        self.pulo = -10
+        self.peso = 1
+        self.pulo = -15
+
+    def importar_animacoes(self):
+        nome_diretorio = "./assets/characters/main/"
+        self.estados = {"idle": [], "jump_left": [],
+                        "jump_right": [], "running_left": [], "running_right": [], "attack_left": [], "attack_right": []}
+
+        for animacoes in self.estados.keys():
+            diretorio = nome_diretorio + animacoes
+            self.estados[animacoes] = importar_arquivo(diretorio)
+
+    def animar(self):
+        animacao = self.estados["running_right"]
+        self.estado_animacao += self.velocidade_animacao
+        if self.estado_animacao >= len(animacao):
+            self.estado_animacao = 0
+        self.image = animacao[int(self.estado_animacao)]
 
     def movimento(self):
         '''
@@ -31,7 +50,7 @@ class Jogador(pygame.sprite.Sprite):
         else:
             self.direcao.x = 0
 
-        if tecla[pygame.K_SPACE]:
+        if tecla[pygame.K_SPACE] and self.direcao.y == 0:
             self.pular()
 
     def gravidade(self):
@@ -52,3 +71,4 @@ class Jogador(pygame.sprite.Sprite):
         Método que aplica a movimentação.
         '''
         self.movimento()
+        self.animar()

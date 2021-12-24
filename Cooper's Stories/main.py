@@ -9,6 +9,7 @@ tela = pygame.display.set_mode((largura, altura))
 clock = pygame.time.Clock()
 level = MostrarBlocos(mapa, tela)
 
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

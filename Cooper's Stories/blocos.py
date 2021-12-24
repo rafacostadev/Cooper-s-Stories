@@ -10,8 +10,8 @@ class Bloco(pygame.sprite.Sprite):
 
     def __init__(self, pos, tam):
         super().__init__()
-        self.image = pygame.Surface((tam, tam))
-        self.image.fill("green")
+        self.image = pygame.image.load(
+            "./assets/background/blocks/IndustrialTile_73.png")
         self.rect = self.image.get_rect(midbottom=pos)
 
     def update(self, movimento_x):
