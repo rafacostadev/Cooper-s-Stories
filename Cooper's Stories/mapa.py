@@ -43,6 +43,10 @@ class MostrarBlocos():
                     self.npc.add(npc)
 
     def movimento_camera(self):
+        '''
+        Adiciona o truque do movimento da câmera, movendo os 
+        blocos no background se o jogador chegar a certa parte do mapa.
+        '''
         jogador = self.jogador.sprite
         jogador_x = jogador.rect.centerx
         direcao_x = jogador.direcao.x
@@ -57,6 +61,10 @@ class MostrarBlocos():
             jogador.velocidade = 4
 
     def colisao_horizontal(self):
+        '''
+        Adiciona a colisão horizontal entre o 
+        personagem e os blocos do mapa.
+        '''
         jogador = self.jogador.sprite
         jogador.rect.x += jogador.direcao.x * jogador.velocidade
         for sprite in self.blocos.sprites():
@@ -67,6 +75,11 @@ class MostrarBlocos():
                     jogador.rect.right = sprite.rect.left
 
     def colisao_vertical(self):
+        '''
+        Adiciona a colisão vertical entre o
+        o personagem e os blocos do mapa e verifica
+        se o jogador está no solo para poder pular.
+        '''
         jogador = self.jogador.sprite
         jogador.gravidade()
         for sprite in self.blocos.sprites():
@@ -74,9 +87,13 @@ class MostrarBlocos():
                 if jogador.direcao.y > 0:
                     jogador.rect.bottom = sprite.rect.top
                     jogador.direcao.y = 0
+                    jogador.no_chao = True
                 elif jogador.direcao.y < 0:
                     jogador.rect.top = sprite.rect.bottom
                     jogador.direcao.y = 0
+
+        if jogador.no_chao and jogador.direcao.y < 0 or jogador.direcao.y > 1:
+            jogador.no_chao = False
 
     def mostrar_mapa(self):
         '''

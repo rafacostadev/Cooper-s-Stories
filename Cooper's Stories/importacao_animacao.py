@@ -3,8 +3,9 @@ import pygame
 
 
 def importar_arquivo(caminho):
+    '''Importa as imagens para serem usadas na animação do personagem'''
     lista_animacao = []
-    for _, __, imagens_animacao in walk(caminho):
+    for n, m, imagens_animacao in walk(caminho):
         for imagens in imagens_animacao:
             diretorio = caminho + '/' + imagens
             imagem = pygame.image.load(diretorio).convert_alpha()

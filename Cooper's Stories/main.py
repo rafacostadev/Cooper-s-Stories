@@ -18,7 +18,6 @@ while True:
 
     tela.fill("black")
     level.mostrar_mapa()
-
     # Adicionar antes
     pygame.display.update()
     clock.tick(60)
