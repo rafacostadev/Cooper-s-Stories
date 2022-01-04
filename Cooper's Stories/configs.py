@@ -1,20 +1,5 @@
-# Layout do mapa
-mapa = [
-    "                ",
-    "                   ",
-    "                                ",
-    "                   ",
-    "                                     ",
-    "                                     XXX",
-    "               X                XXX",
-    "          P  N X              ",
-    "    X XXXXXXXXXX   XXXX   XXXX",
-    "    X XXXXXXXXXX   XXXX   XXXX",
-    "    XXXXXXXXXXXX   XXXX   XXXX",
-    "XXXXXXXXXXXXXXXX   XXXX   XXXX"]
-
-
 # Configurações de tamanho
+num_blocos_vertical = 11
 tamanhoBloco = 32
 largura = 1200
-altura = (len(mapa)-1) * tamanhoBloco
+altura = num_blocos_vertical * tamanhoBloco

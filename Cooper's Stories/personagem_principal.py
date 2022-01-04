@@ -1,5 +1,5 @@
 import pygame
-from importacao_animacao import importar_arquivo
+from importacoes import importar_arquivo
 
 
 class Jogador(pygame.sprite.Sprite):
@@ -18,7 +18,7 @@ class Jogador(pygame.sprite.Sprite):
         self.velocidade_animacao = 0.05
         # Configurações de personagem
         self.image = self.estados["idle"][self.estado_animacao]
-        self.rect = self.image.get_rect(midbottom=pos)
+        self.rect = self.image.get_rect(topleft=pos)
         self.direcao = pygame.math.Vector2(0, 0)
         # Configurações de movimento e animação
         self.velocidade = 4

@@ -1,46 +1,46 @@
 import pygame
 from configs import *
-from blocos import Bloco
+from blocos import Bloco, BlocosPisos
 from personagem_principal import Jogador
-from missao_1_npc import Npc
+from level_config import *
+from importacoes import importar_arquivo_csv, importar_blocos_recortados
 
 
 class MostrarBlocos():
     '''
     Classe que recebe os atributos para iniciar o mapa completo.
-    level = "mapa" que vai ser usado para mostrar os blocos na tela.
+    level = arquivo CSV que vai ser utilizado para mostrar os blocos na tela.
     superficie = a tela em que vai ser mostrada o mapa.
     '''
 
     def __init__(self, level, superficie):
         self.superficie = superficie
-        self.setar_mapa(level)
+        layout = importar_arquivo_csv(level["pisos"])
+        self.terreno_mapa = self.gerar_blocos(layout, "pisos")
 
         # Movimento da câmera
         self.movimento = 0
 
-    def setar_mapa(self, mapa):
+    def gerar_blocos(self, layout, tipo):
         '''
-        Recebe o mapa como atributo para identificar onde colocar cada bloco e
-        os adiciona no grupo de sprites de blocos.
+        Recebe o layout como atributo para identificar onde posicionar
+        cada bloco no jogo. Recebe o tipo para identificar que tipo de
+        bloco está sendo posicionado.
         '''
-        self.blocos = pygame.sprite.Group()
-        self.jogador = pygame.sprite.GroupSingle()
-        self.npc = pygame.sprite.GroupSingle()
-
-        for index_linha, linhas in enumerate(mapa):
+        blocos = pygame.sprite.Group()
+        for index_linha, linhas in enumerate(layout):
             for index_coluna, coluna in enumerate(linhas):
-                PosX = index_coluna * tamanhoBloco
-                PosY = index_linha * tamanhoBloco
-                if coluna == "X":
-                    bloco = Bloco((PosX, PosY), tamanhoBloco)
-                    self.blocos.add(bloco)
-                elif coluna == "P":
-                    jogador = Jogador((PosX, PosY))
-                    self.jogador.add(jogador)
-                elif coluna == "N":
-                    npc = Npc((PosX, PosY))
-                    self.npc.add(npc)
+                if coluna != "-1":
+                    PosX = index_coluna * tamanhoBloco
+                    PosY = index_linha * tamanhoBloco
+                    if tipo == "pisos":
+                        lista_blocos_pisos = importar_blocos_recortados(
+                            "./assets/level/tile_set/Tiles.png")
+                        bloco_superficie = lista_blocos_pisos[int(coluna)]
+                        sprite = BlocosPisos(
+                            tamanhoBloco, PosX, PosY, bloco_superficie)
+                        blocos.add(sprite)
+        return blocos
 
     def movimento_camera(self):
         '''
@@ -101,13 +101,12 @@ class MostrarBlocos():
         os blocos e jogador na tela e executar todos os métodos restantes.
         '''
         # Mapa
-        self.blocos.draw(self.superficie)
-        self.blocos.update(self.movimento)
-        self.movimento_camera()
-        self.colisao_horizontal()
-        self.colisao_vertical()
-        # Jogador
-        self.jogador.update()
-        self.jogador.draw(self.superficie)
-        # Npc
-        self.npc.draw(self.superficie)
+        self.terreno_mapa.draw(self.superficie)
+        self.terreno_mapa.update(-2)
+        # self.terreno_mapa.update(self.movimento)
+        # self.movimento_camera()
+        # self.colisao_horizontal()
+        # self.colisao_vertical()
+        # # Jogador
+        # self.jogador.update()
+        # self.jogador.draw(self.superficie)
