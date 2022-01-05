@@ -20,7 +20,7 @@ class Bloco(pygame.sprite.Sprite):
         self.rect.x += movimento_x
 
 
-class BlocosPisos(Bloco):
+class BlocosEstaticos(Bloco):
     def __init__(self, tam, posx, posy, superficie):
         super().__init__(tam, posx, posy)
         self.image = superficie

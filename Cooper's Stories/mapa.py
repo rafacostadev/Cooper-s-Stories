@@ -1,6 +1,6 @@
 import pygame
 from configs import *
-from blocos import Bloco, BlocosPisos
+from blocos import Bloco, BlocosEstaticos
 from personagem_principal import Jogador
 from level_config import *
 from importacoes import importar_arquivo_csv, importar_blocos_recortados
@@ -15,8 +15,19 @@ class MostrarBlocos():
 
     def __init__(self, level, superficie):
         self.superficie = superficie
-        layout = importar_arquivo_csv(level["pisos"])
-        self.terreno_mapa = self.gerar_blocos(layout, "pisos")
+
+        # Blocos de piso
+        pisos_layout = importar_arquivo_csv(level["pisos"])
+        self.terreno_mapa = self.gerar_blocos(pisos_layout, "pisos")
+
+        # Blocos de background
+        objetos_background_layout = importar_arquivo_csv(level["objetos"])
+        self.objetos_background = self.gerar_blocos(
+            objetos_background_layout, "objetos")
+
+        # Moedas
+        moedas_layout = importar_arquivo_csv(level["dinheiro"])
+        self.moedas = self.gerar_blocos(moedas_layout, "moedas")
 
         # Movimento da câmera
         self.movimento = 0
@@ -37,9 +48,26 @@ class MostrarBlocos():
                         lista_blocos_pisos = importar_blocos_recortados(
                             "./assets/level/tile_set/Tiles.png")
                         bloco_superficie = lista_blocos_pisos[int(coluna)]
-                        sprite = BlocosPisos(
+                        sprite = BlocosEstaticos(
                             tamanhoBloco, PosX, PosY, bloco_superficie)
-                        blocos.add(sprite)
+
+                    if tipo == "objetos":
+                        lista_blocos_background = importar_blocos_recortados(
+                            "./assets/level/tile_set/Animated_objects.png")
+                        blocos_background = lista_blocos_background[int(
+                            coluna)]
+                        sprite = BlocosEstaticos(
+                            tamanhoBloco, PosX, PosY, blocos_background)
+
+                    if tipo == "moedas":
+                        lista_blocos_moedas = importar_blocos_recortados(
+                            "./assets/level/tile_set/Animated_objects.png")
+                        blocos_moedas = lista_blocos_moedas[int(coluna)]
+                        sprite = BlocosEstaticos(
+                            tamanhoBloco, PosX, PosY, blocos_moedas)
+
+                    blocos.add(sprite)
+
         return blocos
 
     def movimento_camera(self):
@@ -102,7 +130,12 @@ class MostrarBlocos():
         '''
         # Mapa
         self.terreno_mapa.draw(self.superficie)
+        self.objetos_background.draw(self.superficie)
+        self.moedas.draw(self.superficie)
+        self.moedas.update(-2)
         self.terreno_mapa.update(-2)
+        self.objetos_background.update(-2)
+
         # self.terreno_mapa.update(self.movimento)
         # self.movimento_camera()
         # self.colisao_horizontal()
