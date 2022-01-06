@@ -44,7 +44,8 @@ def importar_blocos_recortados(caminho):
         for coluna in range(bloco_x):
             x = coluna * tamanhoBloco
             y = linha * tamanhoBloco
-            nova_superficie = pygame.Surface((tamanhoBloco, tamanhoBloco))
+            nova_superficie = pygame.Surface(
+                (tamanhoBloco, tamanhoBloco), flags=pygame.SRCALPHA)
             nova_superficie.blit(superficie, (0, 0), pygame.Rect(
                 x, y, tamanhoBloco, tamanhoBloco))
             blocos_recortados.append(nova_superficie)

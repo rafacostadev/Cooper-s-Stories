@@ -1,9 +1,11 @@
 import pygame
 from configs import *
-from blocos import Bloco, BlocosEstaticos
+from blocos import Bloco, BlocosEstaticos, BlocosAnimados
 from personagem_principal import Jogador
+from inimigo import Inimigo
 from level_config import *
 from importacoes import importar_arquivo_csv, importar_blocos_recortados
+from background_image import background
 
 
 class MostrarBlocos():
@@ -16,18 +18,32 @@ class MostrarBlocos():
     def __init__(self, level, superficie):
         self.superficie = superficie
 
+        # Jogador
+        jogador_layout = importar_arquivo_csv(level["jogador"])
+        self.jogador = pygame.sprite.GroupSingle()
+        self.objetivo = pygame.sprite.GroupSingle()
+        self.setar_jogador(jogador_layout)
+
+        # Imagem de fundo
+        self.background = background()
+
         # Blocos de piso
         pisos_layout = importar_arquivo_csv(level["pisos"])
         self.terreno_mapa = self.gerar_blocos(pisos_layout, "pisos")
 
-        # Blocos de background
-        objetos_background_layout = importar_arquivo_csv(level["objetos"])
-        self.objetos_background = self.gerar_blocos(
-            objetos_background_layout, "objetos")
-
         # Moedas
         moedas_layout = importar_arquivo_csv(level["dinheiro"])
-        self.moedas = self.gerar_blocos(moedas_layout, "moedas")
+        self.moedas = self.gerar_blocos(moedas_layout, "dinheiro")
+
+        # Inimigos
+        inimigos_layout = importar_arquivo_csv(level["inimigos"])
+        self.inimigos = self.gerar_blocos(inimigos_layout, "inimigos")
+
+        # Limites inimigos
+        limites_inimigos_layout = importar_arquivo_csv(
+            level["limites_inimigos"])
+        self.limites_inimigos = self.gerar_blocos(
+            limites_inimigos_layout, "limites_inimigos")
 
         # Movimento da câmera
         self.movimento = 0
@@ -51,24 +67,40 @@ class MostrarBlocos():
                         sprite = BlocosEstaticos(
                             tamanhoBloco, PosX, PosY, bloco_superficie)
 
-                    if tipo == "objetos":
-                        lista_blocos_background = importar_blocos_recortados(
-                            "./assets/level/tile_set/Animated_objects.png")
-                        blocos_background = lista_blocos_background[int(
-                            coluna)]
-                        sprite = BlocosEstaticos(
-                            tamanhoBloco, PosX, PosY, blocos_background)
+                    if tipo == "dinheiro":
+                        sprite = BlocosAnimados(
+                            tamanhoBloco, PosX, PosY, "./assets/level/tile_set/dinheiro_sprites")
 
-                    if tipo == "moedas":
-                        lista_blocos_moedas = importar_blocos_recortados(
-                            "./assets/level/tile_set/Animated_objects.png")
-                        blocos_moedas = lista_blocos_moedas[int(coluna)]
-                        sprite = BlocosEstaticos(
-                            tamanhoBloco, PosX, PosY, blocos_moedas)
+                    if tipo == "inimigos":
+                        sprite = Inimigo(tamanhoBloco, PosX, PosY)
+
+                    if tipo == "limites_inimigos":
+                        sprite = Bloco(
+                            tamanhoBloco, PosX, PosY)
 
                     blocos.add(sprite)
 
         return blocos
+
+    def setar_jogador(self, layout):
+        for index_linha, linhas in enumerate(layout):
+            for index_coluna, coluna in enumerate(linhas):
+                PosX = index_coluna * tamanhoBloco
+                PosY = index_linha * tamanhoBloco
+                if coluna == "0":
+                    sprite = Jogador((PosX, PosY))
+                    self.jogador.add(sprite)
+                if coluna == "1":
+                    objetivo_imagem = pygame.image.load(
+                        "./assets/level/tile_set/player_goal.png").convert_alpha()
+                    sprite = BlocosEstaticos(
+                        tamanhoBloco, PosX, PosY, objetivo_imagem)
+                    self.objetivo.add(sprite)
+
+    def colisao_movimentos_inimigo(self):
+        for inimigos in self.inimigos.sprites():
+            if pygame.sprite.spritecollide(inimigos, self.limites_inimigos, False):
+                inimigos.inverter_movimento()
 
     def movimento_camera(self):
         '''
@@ -95,7 +127,7 @@ class MostrarBlocos():
         '''
         jogador = self.jogador.sprite
         jogador.rect.x += jogador.direcao.x * jogador.velocidade
-        for sprite in self.blocos.sprites():
+        for sprite in self.terreno_mapa.sprites():
             if sprite.rect.colliderect(jogador.rect):
                 if jogador.direcao.x < 0:
                     jogador.rect.left = sprite.rect.right
@@ -110,7 +142,7 @@ class MostrarBlocos():
         '''
         jogador = self.jogador.sprite
         jogador.gravidade()
-        for sprite in self.blocos.sprites():
+        for sprite in self.terreno_mapa.sprites():
             if sprite.rect.colliderect(jogador.rect):
                 if jogador.direcao.y > 0:
                     jogador.rect.bottom = sprite.rect.top
@@ -129,17 +161,33 @@ class MostrarBlocos():
         os blocos e jogador na tela e executar todos os métodos restantes.
         '''
         # Mapa
-        self.terreno_mapa.draw(self.superficie)
-        self.objetos_background.draw(self.superficie)
-        self.moedas.draw(self.superficie)
-        self.moedas.update(-2)
-        self.terreno_mapa.update(-2)
-        self.objetos_background.update(-2)
 
-        # self.terreno_mapa.update(self.movimento)
+        # Desenhando o background
+        self.background.draw(self.superficie)
+
+        # Desenhando o terreno sólido do mapa e atualizando a posição
+        self.terreno_mapa.update(self.movimento)
+        self.terreno_mapa.draw(self.superficie)
+
+        # Desenhando as moedas do jogo e atualizando a posição
+        self.moedas.update(self.movimento)
+        self.moedas.draw(self.superficie)
+
+        # Desenhando os inimigos e atualizando a posição e os limites
+        self.inimigos.update(self.movimento)
+        self.limites_inimigos.update(self.movimento)
+        self.colisao_movimentos_inimigo()
+        self.inimigos.draw(self.superficie)
+
+        # Jogador
+        self.objetivo.update(self.movimento)
+        self.jogador.update()
+        self.colisao_horizontal()
+        self.colisao_vertical()
+        self.movimento_camera()
+        self.jogador.draw(self.superficie)
+        self.objetivo.draw(self.superficie)
+
         # self.movimento_camera()
         # self.colisao_horizontal()
         # self.colisao_vertical()
-        # # Jogador
-        # self.jogador.update()
-        # self.jogador.draw(self.superficie)

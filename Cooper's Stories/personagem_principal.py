@@ -21,7 +21,7 @@ class Jogador(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
         self.direcao = pygame.math.Vector2(0, 0)
         # Configurações de movimento e animação
-        self.velocidade = 4
+        self.velocidade = 2
         self.peso = 1
         self.pulo = -15
         self.lado_direito = True

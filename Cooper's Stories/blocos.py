@@ -1,4 +1,5 @@
 import pygame
+from importacoes import importar_arquivo
 
 
 class Bloco(pygame.sprite.Sprite):
@@ -24,3 +25,21 @@ class BlocosEstaticos(Bloco):
     def __init__(self, tam, posx, posy, superficie):
         super().__init__(tam, posx, posy)
         self.image = superficie
+
+
+class BlocosAnimados(Bloco):
+    def __init__(self, tam, posx, posy, caminho):
+        super().__init__(tam, posx, posy)
+        self.sprites = importar_arquivo(caminho)
+        self.sprite_atual = 0
+        self.image = self.sprites[self.sprite_atual]
+
+    def animar(self):
+        self.sprite_atual += 0.15
+        if self.sprite_atual >= len(self.sprites):
+            self.sprite_atual = 0
+        self.image = self.sprites[int(self.sprite_atual)]
+
+    def update(self, movimento_x):
+        self.rect.x += movimento_x
+        self.animar()
