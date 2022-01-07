@@ -1,13 +1,12 @@
 import pygame
 from blocos import BlocosAnimados
-from random import randint
 
 
 class Inimigo(BlocosAnimados):
     def __init__(self, tamanho, posx, posy):
         super().__init__(tamanho, posx, posy, "./assets/characters/inimigo")
         self.rect.y -= 6
-        self.velocidade = randint(1, 2)
+        self.velocidade = 1
 
     def movimento(self):
         self.rect.x += self.velocidade

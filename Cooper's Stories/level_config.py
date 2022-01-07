@@ -6,3 +6,11 @@ level_1 = {
     "limites_inimigos": "./assets/level/1/level_1_limites_inimigos.csv",
     "jogador": "./assets/level/1/level_1_jogador.csv"
 }
+
+level_2 = {
+
+}
+
+level_3 = {
+
+}

@@ -1,12 +1,13 @@
 import pygame
 from importacoes import importar_arquivo
+from configs import altura
 
 
 class Jogador(pygame.sprite.Sprite):
     '''
     Classe que cria tudo relacionado ao jogador.
-    pos = Posição no mapa em que o jogador vai ser posicionado, no caso,
-    é baseada na lista do arquivo configs.
+    pos = Posição no mapa em que o jogador vai ser posicionado
+    baseado no arquivo CSV do jogador.
     '''
 
     def __init__(self, pos):
@@ -16,10 +17,12 @@ class Jogador(pygame.sprite.Sprite):
         # Configurações de animação
         self.estado_animacao = 0
         self.velocidade_animacao = 0.05
+
         # Configurações de personagem
         self.image = self.estados["idle"][self.estado_animacao]
         self.rect = self.image.get_rect(topleft=pos)
         self.direcao = pygame.math.Vector2(0, 0)
+
         # Configurações de movimento e animação
         self.velocidade = 2
         self.peso = 1
@@ -65,9 +68,11 @@ class Jogador(pygame.sprite.Sprite):
         if tecla[pygame.K_RIGHT]:
             self.direcao.x = 1
             self.lado_direito = True
+
         elif tecla[pygame.K_LEFT]:
             self.direcao.x = -1
             self.lado_direito = False
+
         else:
             self.direcao.x = 0
 
