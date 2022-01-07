@@ -1,4 +1,6 @@
 import pygame
+from sys import exit
+from pygame.constants import K_ESCAPE
 from configs import *
 from blocos import Bloco, BlocosEstaticos, BlocosAnimados
 from personagem_principal import Jogador
@@ -21,11 +23,11 @@ class MostrarBlocos():
         # Superfície em que vai ser mostrado o jogo
         self.superficie = superficie
 
+        # Movimento da câmera
+        self.movimento = 0
+
         # Status mapa
         self.mapa_atual = level_1
-        self.objetivos_1 = False
-        self.objetivos_2 = False
-        self.objetivos_3 = False
 
         # Status jogador
         self.vivo = True
@@ -61,9 +63,6 @@ class MostrarBlocos():
             self.mapa_atual["limites_inimigos"])
         self.limites_inimigos = self.gerar_blocos(
             limites_inimigos_layout, "limites_inimigos")
-
-        # Movimento da câmera
-        self.movimento = 0
 
     def gerar_blocos(self, layout, tipo):
         '''
@@ -192,24 +191,6 @@ class MostrarBlocos():
         if self.mapa_atual == level_1 and len(self.moedas) == 0:
             self.objetivos_1 = True
 
-        if self.mapa_atual == level_2 and len(self.moedas) == 0:
-            pass
-
-        if self.mapa_atual == level_3 and len(self.moedas) == 0:
-            pass
-
-    def selecionar_fase(self):
-        if self.mapa_atual == level_1 and self.objetivos_1:
-            print("passou")
-        if self.mapa_atual == level_2 and self.objetivos_2:
-            self.mapa_atual = level_3
-        if self.mapa_atual == level_3 and self.objetivos_3:
-            pass
-
-    def checar_fase(self):
-        print(self.mapa_atual)
-        return self.mapa_atual
-
     def colisao_inimigos(self):
         '''
         Adiciona a colisão com os inimigos do jogo para eliminar
@@ -262,7 +243,14 @@ class MostrarBlocos():
         if not self.vivo:
             imagem_game_over = pygame.image.load(
                 "./assets/level/gameover/game_over_screen.jpg")
-            self.superficie.blit(imagem_game_over, (altura/2, largura/2))
+            imagem_game_over = pygame.transform.scale(
+                imagem_game_over, (largura, altura))
+            self.superficie.blit(imagem_game_over, (0, 0))
+
+            input = pygame.key.get_pressed()
+            if input[K_ESCAPE]:
+                pygame.quit()
+                exit()
 
     def UI(self):
         if self.vida_atual == 4:
@@ -286,42 +274,46 @@ class MostrarBlocos():
         os blocos e jogador na tela e executar todos os métodos restantes.
         '''
 
-        # Desenhando o background
-        self.background.draw(self.superficie)
+        if self.vivo:
+            # Checando estados do jogo
+            self.queda()
+            self.morte()
 
-        # Desenhando o terreno sólido do mapa e atualizando a posição
-        self.terreno_mapa.update(self.movimento)
-        self.terreno_mapa.draw(self.superficie)
+            # Desenhando o background
+            self.background.draw(self.superficie)
 
-        # Desenhando as moedas do jogo e atualizando a posição
-        self.moedas.update(self.movimento)
-        self.moedas.draw(self.superficie)
+            # Desenhando o terreno sólido do mapa e atualizando a posição
+            self.terreno_mapa.update(self.movimento)
+            self.terreno_mapa.draw(self.superficie)
 
-        # Desenhando os inimigos e atualizando a posição e os limites
-        self.inimigos.update(self.movimento)
-        self.limites_inimigos.update(self.movimento)
-        self.colisao_movimentos_inimigo()
-        self.inimigos.draw(self.superficie)
+            # Desenhando as moedas do jogo e atualizando a posição
+            self.moedas.update(self.movimento)
+            self.moedas.draw(self.superficie)
 
-        # Jogador
-        self.objetivo.update(self.movimento)
-        self.jogador.update()
-        self.colisao_horizontal()
-        self.colisao_vertical()
-        self.movimento_camera()
-        self.jogador.draw(self.superficie)
-        self.objetivo.draw(self.superficie)
-        self.colisao_inimigos()
-        self.pegar_moedas()
-        self.invencibilidade()
-        self.queda()
-        self.morte()
-        self.efeito_dano()
-        self.tela_morte()
+            # Desenhando os inimigos e atualizando a posição e os limites
+            self.inimigos.update(self.movimento)
+            self.limites_inimigos.update(self.movimento)
+            self.colisao_movimentos_inimigo()
+            self.inimigos.draw(self.superficie)
 
-        # Objetivos e seleção de fases:
-        self.objetivos()
-        self.selecionar_fase()
+            # Jogador
+            self.objetivo.update(self.movimento)
+            self.jogador.update()
+            self.colisao_horizontal()
+            self.colisao_vertical()
+            self.movimento_camera()
+            self.jogador.draw(self.superficie)
+            self.objetivo.draw(self.superficie)
+            self.colisao_inimigos()
+            self.pegar_moedas()
+            self.invencibilidade()
 
-        # Desenhando a interface
-        self.UI()
+            # Objetivos e seleção de fases:
+            self.objetivos()
+            self.efeito_dano()
+
+            # Desenhando a interface
+            self.UI()
+        else:
+            # Desenhando a tela de morte
+            self.tela_morte()
