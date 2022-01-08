@@ -8,7 +8,6 @@ from inimigo import Inimigo
 from level_config import *
 from importacoes import importar_arquivo_csv, importar_blocos_recortados
 from background_image import background
-from math import sin
 
 
 class MostrarBlocos():
@@ -20,6 +19,23 @@ class MostrarBlocos():
 
     def __init__(self, superficie):
 
+        # Importações sons jogo
+        self.som_jogo = pygame.mixer.Sound("./assets/level/audio/ingame.wav")
+        self.som_jogo.play(loops=-1)
+        self.som_jogo.set_volume(0.2)
+        self.som_dinheiro = pygame.mixer.Sound(
+            "./assets/level/audio/money_collect.mp3")
+        self.som_eliminando_inimigo = pygame.mixer.Sound(
+            "./assets/level/audio/stomp.wav")
+        self.som_game_over = pygame.mixer.Sound(
+            "./assets/level/audio/game_over.mp3")
+        self.som_vitoria = pygame.mixer.Sound(
+            "./assets/level/audio/victory.wav")
+        self.som_grito_morte = pygame.mixer.Sound(
+            "./assets/level/audio/scream_dead.flac")
+        self.som_grito_dano = pygame.mixer.Sound(
+            "./assets/level/audio/scream_hurt.flac")
+
         # Superfície em que vai ser mostrado o jogo
         self.superficie = superficie
 
@@ -28,19 +44,18 @@ class MostrarBlocos():
 
         # Status mapa
         self.mapa_atual = level_1
+        self.objetivo_do_jogo = False
 
         # Status jogador
         self.vivo = True
         self.vida_atual = 4
         self.invencivel = False
-        self.duracao_invencibilidade = 800
+        self.duracao_invencibilidade = 1200
         self.tempo_dano = 0
-        self.valor_piscar = 0
 
         # Jogador
         jogador_layout = importar_arquivo_csv(self.mapa_atual["jogador"])
         self.jogador = pygame.sprite.GroupSingle()
-        self.objetivo = pygame.sprite.GroupSingle()
         self.setar_jogador(jogador_layout)
 
         # Imagem de fundo
@@ -95,7 +110,6 @@ class MostrarBlocos():
                             tamanhoBloco, PosX, PosY)
 
                     blocos.add(sprite)
-
         return blocos
 
     def setar_jogador(self, layout):
@@ -110,12 +124,6 @@ class MostrarBlocos():
                 if coluna == "0":
                     sprite = Jogador((PosX, PosY))
                     self.jogador.add(sprite)
-                if coluna == "1":
-                    objetivo_imagem = pygame.image.load(
-                        "./assets/level/tile_set/player_goal.png").convert_alpha()
-                    sprite = BlocosEstaticos(
-                        tamanhoBloco, PosX, PosY, objetivo_imagem)
-                    self.objetivo.add(sprite)
 
     def colisao_movimentos_inimigo(self):
         '''
@@ -135,11 +143,11 @@ class MostrarBlocos():
         jogador = self.jogador.sprite
         jogador_x = jogador.rect.centerx
         direcao_x = jogador.direcao.x
-        if jogador_x < (largura/6) and direcao_x < 0:
-            self.movimento = 8
+        if jogador_x < (largura/3) and direcao_x < 0:
+            self.movimento = 6
             jogador.velocidade = 0
-        elif jogador_x > largura - (largura/6) and direcao_x > 0:
-            self.movimento = -8
+        elif jogador_x > largura - (largura/3) and direcao_x > 0:
+            self.movimento = -6
             jogador.velocidade = 0
         else:
             self.movimento = 0
@@ -185,11 +193,8 @@ class MostrarBlocos():
         moedas = self.moedas.sprites()
         for moeda in moedas:
             if moeda.rect.colliderect(jogador.rect):
+                self.som_dinheiro.play()
                 moeda.kill()
-
-    def objetivos(self):
-        if self.mapa_atual == level_1 and len(self.moedas) == 0:
-            self.objetivos_1 = True
 
     def colisao_inimigos(self):
         '''
@@ -200,6 +205,7 @@ class MostrarBlocos():
         inimigos = self.inimigos.sprites()
         for inimigo in inimigos:
             if inimigo.rect.colliderect(jogador.rect) and jogador.direcao.y > 0:
+                self.som_eliminando_inimigo.play()
                 inimigo.kill()
                 jogador.direcao.y = -10
             elif inimigo.rect.colliderect(jogador.rect):
@@ -212,22 +218,11 @@ class MostrarBlocos():
 
     def dano(self):
         if not self.invencivel:
+            self.som_grito_dano.play()
+            self.som_grito_dano.set_volume(0.3)
             self.invencivel = True
             self.vida_atual -= 1
             self.tempo_dano = pygame.time.get_ticks()
-
-    def valor_efeito_dano(self):
-        self.valor_piscar = sin(pygame.time.get_ticks())
-        if self.valor_piscar >= 0:
-            return 255
-        else:
-            return 0
-
-    def efeito_dano(self):
-        if self.invencivel:
-            self.jogador.sprite.image.set_alpha(self.valor_piscar)
-        else:
-            self.jogador.sprite.image.set_alpha(255)
 
     def invencibilidade(self):
         if self.invencivel:
@@ -235,18 +230,39 @@ class MostrarBlocos():
             if tempo_atual - self.tempo_dano >= self.duracao_invencibilidade:
                 self.invencivel = False
 
+    def objetivos_jogo(self):
+        if len(self.moedas) == 0:
+            self.objetivo_do_jogo = True
+            self.som_jogo.set_volume(0)
+            self.som_vitoria.play()
+
+    def tela_vitoria(self):
+        imagem = pygame.image.load(
+            "./assets/level/win/win_image.jpg").convert_alpha()
+        imagem = pygame.transform.scale(imagem, (largura, altura))
+        self.superficie.blit(imagem, (0, 0))
+
+        if self.objetivo_do_jogo:
+            input = pygame.key.get_pressed()
+            if input[K_ESCAPE]:
+                pygame.quit()
+                exit()
+
     def morte(self):
         if self.vida_atual <= 0:
             self.vivo = False
+            self.som_game_over.play()
+            self.som_jogo.set_volume(0)
+            self.som_grito_morte.play()
 
     def tela_morte(self):
-        if not self.vivo:
-            imagem_game_over = pygame.image.load(
-                "./assets/level/gameover/game_over_screen.jpg")
-            imagem_game_over = pygame.transform.scale(
-                imagem_game_over, (largura, altura))
-            self.superficie.blit(imagem_game_over, (0, 0))
+        imagem_game_over = pygame.image.load(
+            "./assets/level/gameover/game_over_screen.jpg")
+        imagem_game_over = pygame.transform.scale(
+            imagem_game_over, (largura, altura))
 
+        if not self.vivo:
+            self.superficie.blit(imagem_game_over, (0, 0))
             input = pygame.key.get_pressed()
             if input[K_ESCAPE]:
                 pygame.quit()
@@ -275,10 +291,6 @@ class MostrarBlocos():
         '''
 
         if self.vivo:
-            # Checando estados do jogo
-            self.queda()
-            self.morte()
-
             # Desenhando o background
             self.background.draw(self.superficie)
 
@@ -297,23 +309,26 @@ class MostrarBlocos():
             self.inimigos.draw(self.superficie)
 
             # Jogador
-            self.objetivo.update(self.movimento)
             self.jogador.update()
             self.colisao_horizontal()
             self.colisao_vertical()
             self.movimento_camera()
             self.jogador.draw(self.superficie)
-            self.objetivo.draw(self.superficie)
             self.colisao_inimigos()
             self.pegar_moedas()
             self.invencibilidade()
 
-            # Objetivos e seleção de fases:
-            self.objetivos()
-            self.efeito_dano()
-
             # Desenhando a interface
             self.UI()
+
+            # Checando estados do jogo
+            self.queda()
+            self.morte()
+            self.objetivos_jogo()
+
+        if self.objetivo_do_jogo:
+            self.tela_vitoria()
+
+        # Desenhando a tela de morte
         else:
-            # Desenhando a tela de morte
             self.tela_morte()

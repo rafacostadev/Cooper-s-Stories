@@ -12,7 +12,12 @@ class Jogador(pygame.sprite.Sprite):
 
     def __init__(self, pos):
         super().__init__()
+
+        # Importa as animações do personagem
         self.importar_animacoes()
+
+        # Importa o som do pulo
+        self.som_pulando = pygame.mixer.Sound("./assets/level/audio/jump.wav")
 
         # Configurações de animação
         self.estado_animacao = 0
@@ -77,6 +82,8 @@ class Jogador(pygame.sprite.Sprite):
             self.direcao.x = 0
 
         if tecla[pygame.K_SPACE] and self.no_chao:
+            self.som_pulando.play()
+            self.som_pulando.set_volume(0.2)
             self.pular()
 
     def estadoAnimacao(self):
