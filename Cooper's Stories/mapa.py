@@ -114,8 +114,7 @@ class MostrarBlocos():
 
     def setar_jogador(self, layout):
         '''
-        Posiciona o jogador no mapa baseado no arquivo CSV e também
-        adiciona o objetivo do jogador.
+        Posiciona o jogador no mapa baseado no arquivo CSV.
         '''
         for index_linha, linhas in enumerate(layout):
             for index_coluna, coluna in enumerate(linhas):
@@ -156,7 +155,9 @@ class MostrarBlocos():
     def colisao_horizontal(self):
         '''
         Adiciona a colisão horizontal entre o
-        personagem e os blocos do mapa.
+        personagem e os blocos do mapa e adiciona
+        os valores de movimento ao personagem ao
+        pressionar alguma tecla.
         '''
         jogador = self.jogador.sprite
         jogador.rect.x += jogador.direcao.x * jogador.velocidade
@@ -171,7 +172,8 @@ class MostrarBlocos():
         '''
         Adiciona a colisão vertical entre o
         o personagem e os blocos do mapa e verifica
-        se o jogador está no solo para poder pular.
+        se o jogador está no solo para poder pular e
+        adiciona esse de movimento ao personagem.
         '''
         jogador = self.jogador.sprite
         jogador.gravidade()
@@ -189,6 +191,10 @@ class MostrarBlocos():
             jogador.no_chao = False
 
     def pegar_moedas(self):
+        '''
+        Adiciona colisão para pegar moedas
+        e faze-las desaparecer do mapa.
+        '''
         jogador = self.jogador.sprite
         moedas = self.moedas.sprites()
         for moeda in moedas:
@@ -198,8 +204,8 @@ class MostrarBlocos():
 
     def colisao_inimigos(self):
         '''
-        Adiciona a colisão com os inimigos do jogo para eliminar
-        ou levar dano.
+        Adiciona a colisão com os inimigos do jogo 
+        para eliminar ou levar dano.
         '''
         jogador = self.jogador.sprite
         inimigos = self.inimigos.sprites()
@@ -212,11 +218,18 @@ class MostrarBlocos():
                 self.dano()
 
     def queda(self):
+        '''
+        Adiciona a morte do jogador ao cair do mapa.
+        '''
         jogador = self.jogador.sprite.rect.top
         if jogador >= altura:
             self.vida_atual = 0
 
     def dano(self):
+        '''
+        Adiciona o dano ao personagem se
+        ele não estiver com frame de invencibilidade.
+        '''
         if not self.invencivel:
             self.som_grito_dano.play()
             self.som_grito_dano.set_volume(0.3)
@@ -225,18 +238,31 @@ class MostrarBlocos():
             self.tempo_dano = pygame.time.get_ticks()
 
     def invencibilidade(self):
+        '''
+        Adiciona o frame de invulnerabilidade
+        ao levar dano de inimigos.
+        '''
         if self.invencivel:
             tempo_atual = pygame.time.get_ticks()
             if tempo_atual - self.tempo_dano >= self.duracao_invencibilidade:
                 self.invencivel = False
 
     def objetivos_jogo(self):
+        '''
+        Adiciona o objetivo do jogo que é
+        coletar as moedas.
+        '''
         if len(self.moedas) == 0:
             self.objetivo_do_jogo = True
             self.som_jogo.set_volume(0)
             self.som_vitoria.play()
 
     def tela_vitoria(self):
+        '''
+        Método que mostra a tela de vitória
+        e permite o jogador apertar ESC para
+        sair do jogo.
+        '''
         imagem = pygame.image.load(
             "./assets/level/win/win_image.jpg").convert_alpha()
         imagem = pygame.transform.scale(imagem, (largura, altura))
@@ -249,6 +275,11 @@ class MostrarBlocos():
                 exit()
 
     def morte(self):
+        '''
+        Verifica a vida do personagem para atualizar
+        o status de vivo ou morto e adicionar a música
+        de game over e o grito de morte.
+        '''
         if self.vida_atual <= 0:
             self.vivo = False
             self.som_game_over.play()
@@ -256,6 +287,10 @@ class MostrarBlocos():
             self.som_grito_morte.play()
 
     def tela_morte(self):
+        '''
+        Método que mostra a tela de morte
+        se o status for esse.
+        '''
         imagem_game_over = pygame.image.load(
             "./assets/level/gameover/game_over_screen.jpg")
         imagem_game_over = pygame.transform.scale(
@@ -269,6 +304,11 @@ class MostrarBlocos():
                 exit()
 
     def UI(self):
+        '''
+        Carrega as imagens de vida do personagem
+        e atualiza elas em relação a quantidade
+        de vida do mesmo.
+        '''
         if self.vida_atual == 4:
             vida = pygame.image.load(
                 "./assets/level/UI/1.png").convert_alpha()
